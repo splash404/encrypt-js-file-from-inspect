@@ -1,0 +1,41 @@
+## SPLASH.X
+## How to encrypt js file html
+
+1.npm install -g browserify
+2.create decrypt-script.js with code
+ 	const CryptoJS = require("crypto-js");
+	const { secretjskey } = require("../../secretfile");
+
+	function decryptScript(encryptedScript) {
+  	const decryptedScript = CryptoJS.AES.decrypt(
+    	encryptedScript,
+    	"yourkey"
+  	).toString(CryptoJS.enc.Utf8);
+ 	 return decryptedScript;
+	}
+
+	window.decryptScript = decryptScript;
+
+3. You have to convert descrypt-script. into bundle.js
+   cmd: browserify public/custom/decrypt-script.js -o public/custom/prebook-bundle.js
+
+4. Then render your html/ejs file like this
+     const scriptFilePath = __dirname + "/public/custom/footer.js";
+     const scriptContent = fs.readFileSync(scriptFilePath, "utf-8");
+     const encryptedScript = CryptoJS.AES.encrypt(
+     scriptContent,
+     "yourkey"
+     ).toString();
+
+    res.render("pages/htmml", { script: encryptedScript });
+
+5. In your HTML/EJS File you have to add
+   <script src="../../custom/bundle.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function (event) {
+        const dscript = `<%= script %>`;
+
+        let decryptedScript = decryptScript(dscript);
+        eval(decryptedScript);
+      });
+    </script>
